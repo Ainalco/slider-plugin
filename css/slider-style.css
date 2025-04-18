@@ -1,12 +1,124 @@
-.custom-slider {
-    margin: 30px 0;
-}
-.slider-item {
-    padding: 10px;
-    text-align: center;
-}
-.slider-item img {
+.custom-slider-wrapper {
+    position: relative;
+    max-width: 100%;
+    overflow: hidden;
+  }
+  
+  .custom-slider {
+    position: relative;
+  }
+  
+  .slide {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+  }
+  
+  .slide.active {
+    position: relative;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  
+  .slide img {
     width: 100%;
     height: auto;
-    border-radius: 8px;
-}
+    display: block;
+  }
+  
+  .caption {
+    position: absolute;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    width: 100%;
+    color: white;
+    padding: 10px 20px;
+    box-sizing: border-box;
+  }
+  
+  /* Controls */
+  .custom-slider-controls button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.8);
+    border: none;
+    border-radius: 50%;
+    font-size: 24px;
+    padding: 10px;
+    cursor: pointer;
+    z-index: 10;
+  }
+  
+  .custom-slider-controls .prev {
+    left: 10px;
+  }
+  
+  .custom-slider-controls .next {
+    right: 10px;
+  }
+  
+  /* Pagination Dots */
+  .custom-slider-pagination {
+    text-align: center;
+    position: absolute;
+    bottom: 15px;
+    width: 100%;
+    z-index: 10;
+  }
+  
+  .custom-slider-pagination .dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin: 0 5px;
+    background: white;
+    border-radius: 50%;
+    border: 2px solid black;
+    cursor: pointer;
+  }
+  
+  .custom-slider-pagination .dot.active {
+    background: black;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .caption {
+      font-size: 0.95em;
+      padding: 8px 15px;
+    }
+  
+    .custom-slider-controls button {
+      font-size: 20px;
+      padding: 8px;
+    }
+  
+    .custom-slider-pagination .dot {
+      width: 10px;
+      height: 10px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .caption {
+      font-size: 0.85em;
+      padding: 6px 12px;
+    }
+  
+    .custom-slider-controls button {
+      font-size: 18px;
+      padding: 6px;
+    }
+  
+    .custom-slider-pagination .dot {
+      width: 8px;
+      height: 8px;
+    }
+  }
+  
