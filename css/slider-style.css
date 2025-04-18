@@ -1,5 +1,5 @@
 .custom-slider {
-    margin: 20px 0;
+    margin: 30px 0;
 }
 .slider-item {
     padding: 10px;
@@ -8,6 +8,5 @@
 .slider-item img {
     width: 100%;
     height: auto;
-    border-radius: 10px;
+    border-radius: 8px;
 }
-.slider{height: auto;}
