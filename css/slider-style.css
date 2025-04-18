@@ -1,0 +1,13 @@
+.custom-slider {
+    margin: 20px 0;
+}
+.slider-item {
+    padding: 10px;
+    text-align: center;
+}
+.slider-item img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+.slider{height: auto;}
