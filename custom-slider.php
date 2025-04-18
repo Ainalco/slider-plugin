@@ -8,63 +8,75 @@
  * License:           GPLv2 or later
  */
 
-if ( ! defined( 'ABSPATH' ) ) {
-    exit;
-}
+ // Exit if accessed directly
+if (!defined('ABSPATH')) exit;
 
-// Load plugin text domain
-function custom_slider_load_textdomain() {
-    load_plugin_textdomain( 'custom-slider', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
-}
-add_action( 'plugins_loaded', 'custom_slider_load_textdomain' );
+// Define plugin constants
+define('CUSTOM_SLIDER_PATH', plugin_dir_path(__FILE__));
+define('CUSTOM_SLIDER_URL', plugin_dir_url(__FILE__));
 
-// Include settings page
-require_once plugin_dir_path( __FILE__ ) . 'includes/slider-settings.php';
+// Include admin pages
+require_once CUSTOM_SLIDER_PATH . 'includes/slider-settings.php';
+require_once CUSTOM_SLIDER_PATH . 'includes/create-slider.php';
+require_once CUSTOM_SLIDER_PATH . 'includes/upload-slider-images.php';
 
 // Enqueue styles and scripts
 function custom_slider_enqueue_assets() {
-    wp_enqueue_style( 'slick-css', 'https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.css' );
-    wp_enqueue_style( 'custom-slider-style', plugin_dir_url( __FILE__ ) . 'css/slider-style.css', [], '1.0' );
-
-    wp_enqueue_script( 'slick-js', 'https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js', array( 'jquery' ), null, true );
-    wp_enqueue_script( 'custom-slider-script', plugin_dir_url( __FILE__ ) . 'js/slider-script.js', array( 'jquery', 'slick-js' ), '1.0', true );
+    wp_enqueue_style('custom-slider-style', CUSTOM_SLIDER_URL . 'css/slider-style.css', [], '1.0');
+    wp_enqueue_script('custom-slider-script', CUSTOM_SLIDER_URL . 'js/slider-script.js', ['jquery'], '1.0', true);
 }
-add_action( 'wp_enqueue_scripts', 'custom_slider_enqueue_assets' );
+add_action('wp_enqueue_scripts', 'custom_slider_enqueue_assets');
 
-// Slider shortcode
-function custom_slider_shortcode() {
-    $type  = get_option( 'custom_slider_type', 'post' );
-    $count = absint( get_option( 'custom_slider_count', 5 ) );
+// Register custom image size.
+function custom_slider_register_image_size() {
+    add_image_size( 'custom_slider_image', 1920, 400, false );
+}
+add_action( 'after_setup_theme', 'custom_slider_register_image_size' );
 
-    $args = array(
-        'post_type'      => $type,
-        'posts_per_page' => $count,
-        'post_status'    => 'publish',
-    );
+// Register shortcode
+function custom_slider_shortcode($atts) {
+    static $instance = 0;
+    $instance++;
+    $atts = shortcode_atts([
+        'id' => ''
+    ], $atts, 'custom_slider');
 
-    $query = new WP_Query( $args );
+    $slider_id = sanitize_text_field($atts['id']);
+    $sliders = get_option('custom_slider_data');
+    if (!isset($sliders[$slider_id])) return '<p>Slider not found.</p>';
+
+    $slider = $sliders[$slider_id];
+    $show_captions = get_option('custom_slider_show_captions', true);
+    
 
     ob_start();
+    ?>
+    <div class="custom-slider-wrapper" id="custom-slider-<?php echo esc_attr($instance); ?>" data-slider-id="<?php echo esc_attr($slider_id); ?>">
+        <div class="custom-slider">
+            <?php foreach ($slider['slides'] as $slide): 
+                $image_url = esc_url($slide['image']);
+                $attachment_id = attachment_url_to_postid($image_url);
+                $custom_size_url = wp_get_attachment_image_url($attachment_id, 'custom_slider_image');
 
-    if ( $query->have_posts() ) {
-        echo '<div class="custom-slider">';
-        while ( $query->have_posts() ) {
-            $query->the_post();
             ?>
-            <div class="slider-item">
-                <?php
-                if ( has_post_thumbnail() ) {
-                    the_post_thumbnail( 'medium' );
-                }
-                ?>
-                <h3><?php echo esc_html( get_the_title() ); ?></h3>
-            </div>
-            <?php
-        }
-        echo '</div>';
-    }
-    wp_reset_postdata();
-
+                <div class="slide">
+                    <img src="<?php echo esc_url($custom_size_url ? $custom_size_url : $image_url); ?>" alt="" />
+                    <?php if ($show_captions): ?>
+                        <div class="caption">
+                            <h3><?php echo esc_html($slide['caption']); ?></h3>
+                            <p><?php echo esc_html($slide['description']); ?></p>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        <div class="custom-slider-controls">
+            <button class="prev">&#10094;</button>
+            <button class="next">&#10095;</button>
+        </div>
+        <div class="custom-slider-pagination"></div>
+    </div>
+    <?php
     return ob_get_clean();
 }
-add_shortcode( 'custom_slider', 'custom_slider_shortcode' );
+add_shortcode('custom_slider', 'custom_slider_shortcode');
